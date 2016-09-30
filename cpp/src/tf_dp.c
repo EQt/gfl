@@ -42,6 +42,12 @@
  * @param beta                 allocated space for the output
  * @return  void
  * @see tf_dp_weight
+ *
+ *  The rest of the parameters are temporary variables.
+ *  In order to reduce the allocation time when repeatedly called,
+ *  unlike in glmgen they have to be preallocated of size
+ *    x, a, b : 2n; tm, tp: n-1
+ *
  */
 void tf_dp (int n, double *y, double lam, double *beta, 
             double *x, double *a, double *b, double *tm, double *tp)
