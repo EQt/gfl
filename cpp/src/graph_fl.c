@@ -534,17 +534,3 @@ double dual_resnorm(int nz, double *z, double *zold, double alpha)
     }
     return sqrt(r / nz);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
