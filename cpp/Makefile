@@ -9,9 +9,6 @@ all:
 	mkdir -p obj
 	cd obj; ${CC} ${CFLAGS}  -c -fPIC ../src/*.c -I${IDIR}
 	${CC} -shared -o lib/libgraphfl.so ${OBJ} -lgsl -lgslcblas
-	
-docs:
-	doxygen Doxyfile
 
 clean:
 	rm obj/*.o
