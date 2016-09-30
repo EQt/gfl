@@ -1095,7 +1095,7 @@ void sample_likelihood_gaussian(const gsl_rng *random,
     int j;
     int k;
     int row;
-    int j_idx;
+    int j_idx = -1;
     double a;
     double lower;
     double upper;
@@ -1200,7 +1200,7 @@ void sample_likelihood_poisson(const gsl_rng *random,
     int j;
     int k;
     int row;
-    int j_idx;
+    int j_idx = -1;
     double a;
     double lower;
     double upper;
