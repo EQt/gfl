@@ -23,6 +23,8 @@ import datetime
 from collections import defaultdict, deque
 from scipy.sparse import issparse, isspmatrix_coo, coo_matrix
 from scipy.sparse.linalg import lsqr
+from networkx import Graph
+from pygfl.trails import decompose_graph
 
 def create_plateaus(data, edges, plateau_size, plateau_vals, plateaus=None):
     '''Creates plateaus of constant value in the data.'''
@@ -103,7 +105,13 @@ def chains_to_trails(chains):
     if len(trails) > 0:
         breakpoints.append(len(trails))
     return (len(breakpoints), np.array(trails, dtype="int32"), np.array(breakpoints, dtype="int32"), edges)
-    
+
+def greedy_trails(edges):
+    # Decompose the graph into trails
+    g = Graph()
+    g.add_edges_from(edges)
+    chains = decompose_graph(g, heuristic='greedy')
+    return chains_to_trails(chains)
 
 def load_edges(filename):
     with open(filename, 'rb') as f:
@@ -167,6 +175,8 @@ def make_directory(base, subdir):
 
 def calc_plateaus(beta, edges, rel_tol=1e-4, verbose=0):
     '''Calculate the plateaus (degrees of freedom) of a graph of beta values in linear time.'''
+    if not isinstance(edges, dict):
+        raise Exception('Edges must be a map from each node to a list of neighbors.')
     to_check = deque(xrange(len(beta)))
     check_map = np.zeros(beta.shape, dtype=bool)
     check_map[np.isnan(beta)] = True
@@ -286,14 +296,16 @@ def cube_graph_edges(rows, cols, aisles):
                     edges[j].append(i)
     return edges
 
-def hypercube_edges(dims):
-    '''Create edge lists for an arbitrary hypercube. TODO: this is probably not the fasted way.'''
+def hypercube_edges(dims, use_map=False):
+    '''Create edge lists for an arbitrary hypercube. TODO: this is probably not the fastest way.'''
     edges = []
     nodes = np.arange(np.product(dims)).reshape(dims)
     for i,d in enumerate(dims):
         for j in xrange(d-1):
             for n1, n2 in zip(np.take(nodes, [j], axis=i).flatten(), np.take(nodes,[j+1], axis=i).flatten()):
                 edges.append((n1,n2))
+    if use_map:
+        return edge_map_from_edge_list(edges)
     return edges
 
 def row_col_trails(rows, cols):
@@ -397,7 +409,8 @@ def decompose_delta(deltak):
     return dk_rows, dk_rowbreaks, dk_cols, dk_vals
 
 def matrix_from_edges(edges):
-    '''Returns a sparse penalty matrix (D) from a list of edge pairs'''
+    '''Returns a sparse penalty matrix (D) from a list of edge pairs. Each edge
+    can have an optional weight associated with it.'''
     max_col = 0
     cols = []
     rows = []
@@ -409,13 +422,15 @@ def matrix_from_edges(edges):
                 if i <= j:
                     edge_list.append((i,j))
         edges = edge_list
-    for i, (s,t) in enumerate(edges):
+    for i, edge in enumerate(edges):
+        s, t = edge[0], edge[1]
+        weight = 1 if len(edge) == 2 else edge[2]
         cols.append(min(s,t))
         cols.append(max(s,t))
         rows.append(i)
         rows.append(i)
-        vals.append(1)
-        vals.append(-1)
+        vals.append(weight)
+        vals.append(-weight)
         if cols[-1] > max_col:
             max_col = cols[-1]
     return coo_matrix((vals, (rows, cols)), shape=(rows[-1]+1, max_col+1))
@@ -431,4 +446,11 @@ def tv_distance(a, b):
     if len(a.shape) == 1:
         return np.sum(np.abs(a - b))
     return np.sum(np.abs(a - b), axis=1)
+
+def edge_map_from_edge_list(edges):
+    result = defaultdict(list)
+    for s,t in edges:
+        result[s].append(t)
+        result[t].append(s)
+    return result
 
