@@ -16,9 +16,9 @@
     along with the GFL library.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from networkx import Graph
-from trails import decompose_graph
-from solver import TrailSolver
-from utils import *
+from .trails import decompose_graph
+from .solver import TrailSolver
+from .utils import *
 
 def solve_gfl(data, edges, weights=None,
               minlam=0.2, maxlam=1000.0, numlam=30,
@@ -27,7 +27,7 @@ def solve_gfl(data, edges, weights=None,
     '''A very easy-to-use version of GFL solver that just requires the data and
     the edges.'''
     if verbose:
-        print 'Decomposing graph into trails'
+        print('Decomposing graph into trails')
 
     ########### Setup the graph
     g = Graph()
@@ -36,7 +36,7 @@ def solve_gfl(data, edges, weights=None,
     ntrails, trails, breakpoints, edges = chains_to_trails(chains)
 
     if verbose:
-        print 'Setting up trail solver'
+        print('Setting up trail solver')
 
     ########### Setup the solver
     solver = TrailSolver(alpha, inflate, maxsteps, converge)
@@ -45,7 +45,7 @@ def solve_gfl(data, edges, weights=None,
     solver.set_data(data, edges, ntrails, trails, breakpoints, weights=weights)
 
     if verbose:
-        print 'Solving'
+        print('Solving')
 
     ########### Run the solver
     if lam:
