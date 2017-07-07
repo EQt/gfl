@@ -4,7 +4,7 @@ from utils import *
 
 def num_nodes(edges):
     s = set()
-    for k,v in edges.iteritems():
+    for k,v in edges.items():
         s |= set(v)
     return np.max(list(s))+1
 
