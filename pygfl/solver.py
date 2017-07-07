@@ -18,7 +18,7 @@
 import numpy as np
 from numpy.ctypeslib import ndpointer
 from ctypes import *
-from utils import *
+from .utils import *
 
 '''Load the graph fused lasso library'''
 graphfl_lib = cdll.LoadLibrary('libgraphfl.so')
@@ -161,20 +161,20 @@ class TrailSolver:
         # Solve the series of lambda values with warm starts at each point
         for i, lam in enumerate(lambda_grid):
             if verbose:
-                print '#{0} Lambda = {1}'.format(i, lam)
+                print('#{0} Lambda = {1}'.format(i, lam))
 
             # Fit to the final values
             beta = self.solve(lam)
 
             if verbose:
-                print 'Calculating degrees of freedom'
+                print('Calculating degrees of freedom')
 
             # Count the number of free parameters in the grid (dof)
             plateaus = calc_plateaus(beta, self.edges)
             dof_trace[i] = len(plateaus)
 
             if verbose:
-                print 'Calculating AIC'
+                print('Calculating AIC')
 
             # Get the negative log-likelihood
             log_likelihood_trace[i] = -0.5 * ((self.y - beta)**2).sum()
@@ -197,10 +197,10 @@ class TrailSolver:
             beta_trace.append(np.array(beta))
             
             if verbose:
-                print 'DoF: {0} AIC: {1} AICc: {2} BIC: {3}'.format(dof_trace[i], aic_trace[i], aicc_trace[i], bic_trace[i])
+                print('DoF: {0} AIC: {1} AICc: {2} BIC: {3}'.format(dof_trace[i], aic_trace[i], aicc_trace[i], bic_trace[i]))
 
         if verbose:
-            print 'Best setting (by BIC): lambda={0} [DoF: {1}, AIC: {2}, AICc: {3} BIC: {4}]'.format(lambda_grid[best_idx], dof_trace[best_idx], aic_trace[best_idx], aicc_trace[best_idx], bic_trace[best_idx])
+            print('Best setting (by BIC): lambda={0} [DoF: {1}, AIC: {2}, AICc: {3} BIC: {4}]'.format(lambda_grid[best_idx], dof_trace[best_idx], aic_trace[best_idx], aicc_trace[best_idx], bic_trace[best_idx]))
 
         return {'aic': aic_trace,
                 'aicc': aicc_trace,
