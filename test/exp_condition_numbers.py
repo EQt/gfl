@@ -10,7 +10,7 @@ from gfl.utils import *
 
 def num_nodes(edges):
     s = set()
-    for k,v in edges.iteritems():
+    for k,v in edges.items():
         s |= set(v)
     return np.max(list(s))+1
 
@@ -89,13 +89,13 @@ if __name__ == '__main__':
     edgelist = get_edgelist('../example/tempedges.csv')
 
 
-    for trial in xrange(100):
+    for trial in range(100):
         truth, y = create_noisy_data('../example/tempedges.csv')
 
         # Generate 100 random tour-based decompositions
         for h in ['rowcol', 'tour', 'random', 'ones']:
-            for i in xrange(1):
-                print 'Trial #{0}, Example #{1}'.format(trial, i)
+            for i in range(1):
+                print('Trial #{0}, Example #{1}'.format(trial, i))
 
                 # Shuffle the edges so we get a different set of trails (i hope)
                 np.random.shuffle(edgelist)
@@ -122,10 +122,10 @@ if __name__ == '__main__':
                 sigma1.append(s1)
                 sigmap.append(sp)
 
-                print '\t-- Trails: {0}'.format(h)
-                print '\t-- Condition number:    {0}'.format(cond)
-                print '\t-- Largest eigenvalue:  {0}'.format(s1)
-                print '\t-- Smallest eigenvalue: {0}'.format(sp)
+                print('\t-- Trails: {0}'.format(h))
+                print('\t-- Condition number:    {0}'.format(cond))
+                print('\t-- Largest eigenvalue:  {0}'.format(s1))
+                print('\t-- Smallest eigenvalue: {0}'.format(sp))
 
                 # Quick and dirty form conversion
                 save_chains(chains, '../example/temptrails.csv')
@@ -146,13 +146,13 @@ if __name__ == '__main__':
                 seconds.append(t1 - t0)
                 steps.append(np.array(solver.steps).sum())
 
-                print '\t-- Seconds: {0}'.format(seconds[-1])
-                print '\t-- Steps: {0}'.format(steps[-1])
+                print('\t-- Seconds: {0}'.format(seconds[-1]))
+                print('\t-- Steps: {0}'.format(steps[-1]))
 
                 if h in ['rowcol', 'ones']:
                     break
 
-    print '------------ FINISHED ------------'
+    print('------------ FINISHED ------------')
     steps = np.array(steps)
     conds = np.array(conds)
     sigma1 = np.array(sigma1)
