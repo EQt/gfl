@@ -15,13 +15,29 @@
     You should have received a copy of the GNU Lesser General Public License
     along with the GFL library.  If not, see <http://www.gnu.org/licenses/>.
 '''
+import sys
 import numpy as np
 from numpy.ctypeslib import ndpointer
+from os import path
 from ctypes import *
 from .utils import *
 
+
+def dlext():
+    """Ending of a library (platform dependent)"""
+    p = sys.platform
+    if p == "win32":
+        return "dll"
+    if p == "linux":
+        return "so"
+    if p == "darwin":
+        return "dylib"
+    raise RuntimeError("Platform %s not supported" % p)
+
+
 '''Load the graph fused lasso library'''
-graphfl_lib = cdll.LoadLibrary('libgraphfl.so')
+graphfl_lib = path.join(path.dirname(__file__), 'libgraphfl.' + dlext())
+graphfl_lib = cdll.LoadLibrary(graphfl_lib)
 graphfl = graphfl_lib.graph_fused_lasso_warm
 graphfl.restype = c_int
 graphfl.argtypes = [c_int, ndpointer(c_double, flags='C_CONTIGUOUS'),
