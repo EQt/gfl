@@ -21,23 +21,11 @@ from numpy.ctypeslib import ndpointer
 from os import path
 from ctypes import *
 from utils import *
-
-
-def dlext():
-    """Ending of a library (platform dependent)"""
-    p = sys.platform
-    if p == "win32":
-        return "dll"
-    if p == "linux":
-        return "so"
-    if p == "darwin":
-        return "dylib"
-    raise RuntimeError("Platform %s not supported" % p)
+from ._libgraphfl import libgraphfl
 
 
 '''Load the graph fused lasso library'''
-graphfl_lib = path.join(path.dirname(__file__), 'libgraphfl.' + dlext())
-graphfl_lib = cdll.LoadLibrary(graphfl_lib)
+graphfl_lib = cdll.LoadLibrary(libgraphfl)
 graphfl = graphfl_lib.graph_fused_lasso_warm
 graphfl.restype = c_int
 graphfl.argtypes = [c_int, ndpointer(c_double, flags='C_CONTIGUOUS'),
