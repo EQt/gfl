@@ -21,6 +21,8 @@
  *   License along with glmgen. If not, see <http://www.gnu.org/licenses/>. *
  ****************************************************************************/
 
+#define DEBUG 1
+
 /**
  * @file tf_dp.c
  * @author Taylor Arnold, Veeranjaneyulu Sadhanala, Ryan Tibshirani
@@ -257,6 +259,13 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta,
   alast = -w[1];
   blast = w[1]*y[1]-lam;
 
+  #ifdef DEBUG
+  printf("k = %d: l = %d, r = %d, lo = %d, hi = %d, "
+         "ahi = %f, alo = %f, bhi = %f, blo = %f\n",
+         k, l, r, lo, hi, ahi, alo, bhi, blo);
+  #endif
+
+
   /* Now iterations 2 through n-1 */
   for (k=1; k<n-1; k++)
   {
@@ -266,10 +275,25 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta,
     blo = bfirst;
     for (lo=l; lo<=r; lo++)
     {
-      if (alo*x[lo]+blo > -lam) break;
+      #ifdef DEBUG
+      printf("x[%d] = %f\n", lo, x[lo]);
+      #endif
+      if (alo*x[lo]+blo > -lam) {
+        #ifdef DEBUG
+        printf("--> lo = %d\n", lo);
+        #endif
+        break;
+      }
+      #ifdef DEBUG
+      printf(" alo += %f, blo += %f\n", a[lo], b[lo]);
+      #endif
       alo += a[lo];
       blo += b[lo];
     }
+    #ifdef DEBUG
+    printf("lo == %d\n", lo);
+    #endif
+
 
    /* Compute hi: step down from r until the
        derivative is less than lam */
@@ -281,6 +305,12 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta,
       ahi += a[hi];
       bhi += b[hi];
     }
+
+    #ifdef DEBUG
+    printf("k = %d: l = %d, r = %d, lo = %d, hi = %d, "
+           "ahi = %f, alo = %f, bhi = %f, blo = %f\n",
+           k, l, r, lo, hi, ahi, alo, bhi, blo);
+    #endif
 
     /* Compute the negative knot */
     tm[k] = (-lam-blo)/alo;
