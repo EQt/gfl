@@ -261,8 +261,9 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta,
 
   #ifdef DEBUG
   printf("k = %d: l = %d, r = %d, lo = %d, hi = %d, "
-         "ahi = %f, alo = %f, bhi = %f, blo = %f\n",
-         k, l, r, lo, hi, ahi, alo, bhi, blo);
+         "ahi = %f, alo = %f, bhi = %f, blo = %f, "
+         "afirst = %f, alast = %f\n",
+         k, l, r, lo, hi, ahi, alo, bhi, blo, afirst, alast);
   #endif
 
 
@@ -308,8 +309,9 @@ void tf_dp_weight (int n, double *y, double *w, double lam, double *beta,
 
     #ifdef DEBUG
     printf("k = %d: l = %d, r = %d, lo = %d, hi = %d, "
-           "ahi = %f, alo = %f, bhi = %f, blo = %f\n",
-           k, l, r, lo, hi, ahi, alo, bhi, blo);
+           "ahi = %f, alo = %f, bhi = %f, blo = %f, "
+           "afirst = %f, alast = %f\n",
+           k, l, r, lo, hi, ahi, alo, bhi, blo, afirst, alast);
     #endif
 
     /* Compute the negative knot */
