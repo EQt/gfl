@@ -20,8 +20,8 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 from os import path
 from ctypes import *
-from ._libgraphfl import libgraphfl
 from .utils import *
+from ._libgraphfl import libgraphfl
 
 '''Load the graph fused lasso library'''
 graphfl_lib = cdll.LoadLibrary(libgraphfl)
