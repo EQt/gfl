@@ -16,18 +16,48 @@
     along with the GFL library.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from networkx import Graph
-from trails import decompose_graph
-from solver import TrailSolver
-from utils import *
+from pygfl.trails import decompose_graph
+from pygfl.solver import TrailSolver
+from pygfl.logistic_solver import LogisticTrailSolver
+from pygfl.binomial_solver import BinomialTrailSolver
+from pygfl.utils import *
 
-def solve_gfl(data, edges, weights=None,
+def solve_gfl(data, edges=None, weights=None,
               minlam=0.2, maxlam=1000.0, numlam=30,
               alpha=0.2, inflate=2., converge=1e-6,
-              maxsteps=1000000, lam=None, verbose=0):
+              maxsteps=1000000, lam=None, verbose=0,
+              missing_val=None, full_path=False,
+              loss='normal'):
     '''A very easy-to-use version of GFL solver that just requires the data and
     the edges.'''
     if verbose:
-        print 'Decomposing graph into trails'
+        print('Decomposing graph into trails')
+
+    if loss == 'binomial':
+        flat_data = data[0].flatten()
+        nonmissing_flat_data = flat_data, data[1].flatten()
+    else:
+        flat_data = data.flatten()
+        nonmissing_flat_data = flat_data
+
+    if edges is None:
+        if loss == 'binomial':
+            if verbose:
+                print('Using default edge set of a grid of same shape as the data: {0}'.format(data[0].shape))
+            edges = hypercube_edges(data[0].shape)
+        else:
+            if verbose:
+                print('Using default edge set of a grid of same shape as the data: {0}'.format(data.shape))
+            edges = hypercube_edges(data.shape)
+        if missing_val is not None:
+            if verbose:
+                print('Removing all data points whose data value is {0}'.format(missing_val))
+            edges = [(e1,e2) for (e1,e2) in edges if flat_data[e1] != missing_val and flat_data[e2] != missing_val]
+            if loss == 'binomial':
+                nonmissing_flat_data = flat_data[flat_data != missing_val], nonmissing_flat_data[1][flat_data != missing_val]
+            else:
+                nonmissing_flat_data = flat_data[flat_data != missing_val]
+
 
     ########### Setup the graph
     g = Graph()
@@ -36,16 +66,23 @@ def solve_gfl(data, edges, weights=None,
     ntrails, trails, breakpoints, edges = chains_to_trails(chains)
 
     if verbose:
-        print 'Setting up trail solver'
+        print('Setting up trail solver')
 
     ########### Setup the solver
-    solver = TrailSolver(alpha, inflate, maxsteps, converge)
+    if loss == 'normal':
+        solver = TrailSolver(alpha, inflate, maxsteps, converge)
+    elif loss == 'logistic':
+        solver = LogisticTrailSolver(alpha, inflate, maxsteps, converge)
+    elif loss == 'binomial':
+        solver = BinomialTrailSolver(alpha, inflate, maxsteps, converge)
+    else:
+        raise NotImplementedError('Loss must be normal, logistic, or binomial')
 
     # Set the data and pre-cache any necessary structures
-    solver.set_data(data, edges, ntrails, trails, breakpoints, weights=weights)
+    solver.set_data(nonmissing_flat_data, edges, ntrails, trails, breakpoints, weights=weights)
 
     if verbose:
-        print 'Solving'
+        print('Solving')
 
     ########### Run the solver
     if lam:
@@ -53,7 +90,9 @@ def solve_gfl(data, edges, weights=None,
         beta = solver.solve(lam)
     else:
         # Grid search to find the best lambda
-        beta = solver.solution_path(minlam, maxlam, numlam, verbose=max(0, verbose-1))['best']
+        beta = solver.solution_path(minlam, maxlam, numlam, verbose=max(0, verbose-1))
+        if not full_path:
+            beta = beta['best']
     
     return beta
 
